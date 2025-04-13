@@ -1,102 +1,138 @@
+#include <stdio.h>
 #include <raylib.h>
+#include <stdbool.h>
+#include "ssps/physics/vec3.h"
+#include "ssps/physics/simulation.h"
 
-int main(void)
-{
-    // Initialization
-    //--------------------------------------------------------------------------------------
-    const int screenWidth = 800;
-    const int screenHeight = 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [core] example - 3d picking");
+/*
+int main(void) {
+    ObjBase obj = (ObjBase){
+        .pos = Vec3_init(0),
+        .vel = Vec3_init(0),
+        .acc = Vec3_init(0),
+        .mass = 10,
+    };
+    obj.pos.y = 20;
 
-    // Define the camera to look into our 3d world
-    Camera camera = { 0 };
-    camera.position = (Vector3){ 10.0f, 10.0f, 10.0f }; // Camera position
-    camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };      // Camera looking at point
-    camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };          // Camera up vector (rotation towards target)
-    camera.fovy = 45.0f;                                // Camera field-of-view Y
-    camera.projection = CAMERA_PERSPECTIVE;             // Camera projection type
+    const size_t target_fps = 60;
+    const size_t runtime = 10;
+    for (int i = 0; i < target_fps * runtime; i++) {
+        Sleep(1000 / target_fps);
 
-    Vector3 cubePosition = { 0.0f, 1.0f, 0.0f };
-    Vector3 cubeSize = { 2.0f, 2.0f, 2.0f };
+        const float dt = 1.0f / target_fps;
+        SimObj_update(&obj, dt);
 
-    Ray ray = { 0 };                    // Picking line ray
-    RayCollision collision = { 0 };     // Ray collision hit info
+        printf("%d - %.2f\n", i, obj.pos.y);
+    }
+    return 0;
+}
+*/
 
-    SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
-    //--------------------------------------------------------------------------------------
+Vector2 
+to_raylib_vector2(Vec3 v) {
+    return (Vector2) { v.x, v.y };
+}
 
-    // Main game loop
-    while (!WindowShouldClose())        // Detect window close button or ESC key
-    {
-        // Update
-        //----------------------------------------------------------------------------------
-        if (IsCursorHidden()) UpdateCamera(&camera, CAMERA_FIRST_PERSON);
+Vector3
+to_raylib_vector3(Vec3 v) {
+    return (Vector3) { v.x, v.y, v.z };
+}
 
-        // Toggle camera controls
-        if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
-        {
-            if (IsCursorHidden()) EnableCursor();
-            else DisableCursor();
+
+int
+main (void) {
+    const int screen_width = 960;
+    const int screen_height = 540;
+
+    InitWindow(screen_width, screen_height, "ssps");
+
+
+    // init objects
+    ObjBase obj = (ObjBase){
+        .pos = { .x = (float)screen_width / 2, .y = (float)screen_height * 0.75f, .z = 0.0f},
+        .vel = Vec3_init(0),
+        .acc = Vec3_init(0),
+        .mass = 10,
+    };
+
+
+    // init time/frame controls
+    double prev_time = GetTime();
+    double current_time = 0.0;
+    double update_draw_time = 0.0;
+    double wait_time = 0.0;
+    float delta_time = 0.0f;
+
+    float acc_time_counter = 0.0f;
+
+    const int target_fps = 60;
+
+    // keep track of collisions
+    bool is_falling = true;
+    float last_collision = -1.0f;
+    int collisions_acc = 0;
+
+    while (!WindowShouldClose()) {
+        // update
+        acc_time_counter += delta_time;
+
+
+        if (delta_time > 0) {
+            SimObj_update(&obj, delta_time * 5);
+        }
+        Vector2 ball_pos = to_raylib_vector2(obj.pos);
+
+        if (is_falling && obj.vel.y > 0) {
+            is_falling = false;
+            collisions_acc++;
+            last_collision = acc_time_counter;
         }
 
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-        {
-            if (!collision.hit)
-            {
-                ray = GetScreenToWorldRay(GetMousePosition(), camera);
-
-                // Check collision between ray and box
-                collision = GetRayCollisionBox(ray,
-                            (BoundingBox){(Vector3){ cubePosition.x - cubeSize.x/2, cubePosition.y - cubeSize.y/2, cubePosition.z - cubeSize.z/2 },
-                                          (Vector3){ cubePosition.x + cubeSize.x/2, cubePosition.y + cubeSize.y/2, cubePosition.z + cubeSize.z/2 }});
-            }
-            else collision.hit = false;
+        if (!is_falling && obj.vel.y < 0) {
+            is_falling = true;
         }
-        //----------------------------------------------------------------------------------
 
-        // Draw
-        //----------------------------------------------------------------------------------
+
+
+        // draw
         BeginDrawing();
 
             ClearBackground(RAYWHITE);
 
-            BeginMode3D(camera);
+            DrawCircleV(ball_pos, 10.0f, BLUE);
+            DrawText(TextFormat("TARGET FPS: %i", target_fps), GetScreenWidth() - 220, 10, 20, LIME);
+            if (delta_time != 0) {
+                DrawText(TextFormat("CURRENT FPS: %i", (int)(1.0f/delta_time)), GetScreenWidth() - 220, 40, 20, GREEN);
+            }
 
-                if (collision.hit)
-                {
-                    DrawCube(cubePosition, cubeSize.x, cubeSize.y, cubeSize.z, RED);
-                    DrawCubeWires(cubePosition, cubeSize.x, cubeSize.y, cubeSize.z, MAROON);
-
-                    DrawCubeWires(cubePosition, cubeSize.x + 0.2f, cubeSize.y + 0.2f, cubeSize.z + 0.2f, GREEN);
-                }
-                else
-                {
-                    DrawCube(cubePosition, cubeSize.x, cubeSize.y, cubeSize.z, GRAY);
-                    DrawCubeWires(cubePosition, cubeSize.x, cubeSize.y, cubeSize.z, DARKGRAY);
-                }
-
-                DrawRay(ray, MAROON);
-                DrawGrid(10, 1.0f);
-
-            EndMode3D();
-
-            DrawText("Try clicking on the box with your mouse!", 240, 10, 20, DARKGRAY);
-
-            if (collision.hit) DrawText("BOX SELECTED", (screenWidth - MeasureText("BOX SELECTED", 30)) / 2, (int)(screenHeight * 0.1f), 30, GREEN);
-
-            DrawText("Right click mouse to toggle camera controls", 10, 430, 10, GRAY);
-
-            DrawFPS(10, 10);
+            if (collisions_acc > 0) {
+                DrawText(TextFormat("COLLISION #%d: %f", collisions_acc, last_collision), GetScreenWidth() - 220, 70, 20, BLACK);
+            }
 
         EndDrawing();
-        //----------------------------------------------------------------------------------
+
+
+        // post processing stuff
+
+        current_time = GetTime();
+        update_draw_time = current_time - prev_time;
+        
+        if (target_fps > 0)          // We want a fixed frame rate
+        {
+            wait_time = (1.0f/(float)target_fps) - update_draw_time;
+            if (wait_time > 0.0) 
+            {
+                WaitTime((float)wait_time);
+                current_time = GetTime();
+                delta_time = (float)(current_time - prev_time);
+            }
+        }
+        else delta_time = (float)update_draw_time;    // Framerate could be variable
+
+        prev_time = current_time;
     }
 
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    CloseWindow();        // Close window and OpenGL context
-    //--------------------------------------------------------------------------------------
-
+    CloseWindow();
     return 0;
 }
