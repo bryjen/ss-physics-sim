@@ -1,0 +1,39 @@
+cmake_minimum_required(VERSION 3.10)
+project(ss_phys_sim C)
+
+set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/deps/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
+
+
+# CREATING EXECUTABLE
+set(HEADER_FILES
+    include/ssps/physics/simulation.h
+    include/ssps/rendering/renderer.h
+)
+
+set(SOURCE_FILES
+    src/main.c
+    src/physics/simulation.c
+    src/rendering/renderer.c
+)
+
+add_executable(ss_phys_sim ${HEADER_FILES} ${SOURCE_FILES})
+
+
+# FIND/LINK "OpenGL"
+# conditional
+if(DEFINED ENV{INCLUDE_OPENGL})
+    message(STATUS "INCLUDE_OPENGL is set to $ENV{INCLUDE_OPENGL}")
+    message(STATUS "Including OpenGL")
+    message(AUTHOR_WARNING "Can cause collisions with Raylib")
+
+    find_package(OpenGL REQUIRED)
+    find_package(GLUT REQUIRED)
+
+    target_include_directories(ss_phys_sim PRIVATE ${GLUT_INCLUDE_DIRS})
+    target_link_libraries(ss_phys_sim PRIVATE ${OPENGL_gl_LIBRARY} ${GLUT_glut_LIBRARY})
+endif()
+
+
+# FIND/LINK "Raylib"
+find_package(raylib CONFIG REQUIRED)
+target_link_libraries(ss_phys_sim PRIVATE raylib)
