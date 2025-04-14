@@ -65,6 +65,14 @@ SSPS_RAYLIB_draw_shapes(const SSPS_Simulation* const simulation) {
     }
 }
 
+void 
+SSPS_RAYLIB_draw_position_text(const SSPS_Simulation* const simulation) {
+    for (int i = 0; i < simulation->num_objs; i++) {
+        SSPS_BaseObj* obj = (simulation->objs[i]);
+        Vec3 pos = obj->pos;
+        DrawText(TextFormat("#%d\t: %.2f %.2f %.2f", i, pos.x, pos.y, pos.z), GetScreenWidth() - 500, 70 + (30 * i), 20, LIME); }
+}
+
 
 
 void
@@ -130,6 +138,10 @@ SSPS_RAYLIB_run() {
             if (delta_time != 0) {
                 DrawText(TextFormat("CURRENT FPS: %i", (int)(1.0f/delta_time)), GetScreenWidth() - 220, 40, 20, GREEN);
             }
+
+#ifndef NDEBUG
+            SSPS_RAYLIB_draw_position_text(simulation);
+#endif
         }
 
         EndDrawing();

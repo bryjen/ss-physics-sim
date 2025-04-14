@@ -1,5 +1,7 @@
 {
   "name": "ss-phys-sim",
   "version-string": "0.1.0",
-  "dependencies": [ "raylib" ]
+  "dependencies": [ 
+    "raylib"
+   ]
 }

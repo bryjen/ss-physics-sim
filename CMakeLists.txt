@@ -6,6 +6,8 @@ set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/deps/vcpkg/scripts/buildsy
 
 # CREATING EXECUTABLE
 set(HEADER_FILES
+    include/ssps/common/arena.h
+
     include/ssps/physics/vec3.h
     include/ssps/physics/simulation.h
     include/ssps/rendering/raylib_renderer.h
@@ -13,7 +15,7 @@ set(HEADER_FILES
 
 set(SOURCE_FILES
     src/main.c
-    src/physics/vec3.c
+    
     src/physics/simulation.c
     src/rendering/raylib_renderer.c
 )
@@ -40,3 +42,8 @@ endif()
 # FIND/LINK "Raylib"
 find_package(raylib CONFIG REQUIRED)
 target_link_libraries(ss_phys_sim PRIVATE raylib)
+
+
+if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "ARM64")
+    add_definitions(-D_M_ARM64)
+endif()

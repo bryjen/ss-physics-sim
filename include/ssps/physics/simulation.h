@@ -25,12 +25,6 @@ typedef struct SSPS_BaseObj {
     float mass;
 } SSPS_BaseObj;
 
-/**
- * @brief
- */
-void 
-SSPS_BaseObj_update(SSPS_BaseObj *obj, float dt);
-
 
 
 /**
@@ -41,11 +35,6 @@ typedef struct SSPS_Sphere {
     float radius;
 } SSPS_Sphere;
 
-/**
- * @brief
- */
-void 
-SSPS_Sphere_update(SSPS_Sphere *sphere, float dt);
 
 
 
