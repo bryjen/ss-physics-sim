@@ -5,7 +5,7 @@
             "name": "(Windows) Launch",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/Debug/temp",
+            "program": "${workspaceFolder}/build/Debug/ss_phys_sim",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

@@ -8,14 +8,14 @@ set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/deps/vcpkg/scripts/buildsy
 set(HEADER_FILES
     include/ssps/physics/vec3.h
     include/ssps/physics/simulation.h
-    include/ssps/rendering/renderer.h
+    include/ssps/rendering/raylib_renderer.h
 )
 
 set(SOURCE_FILES
     src/main.c
     src/physics/vec3.c
     src/physics/simulation.c
-    src/rendering/renderer.c
+    src/rendering/raylib_renderer.c
 )
 
 add_executable(ss_phys_sim ${HEADER_FILES} ${SOURCE_FILES})

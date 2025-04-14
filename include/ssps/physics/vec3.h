@@ -4,7 +4,7 @@
 /**
  * @brief
  */
-typedef struct {
+typedef struct Vec3 {
     float x, y, z;
 } Vec3;
 

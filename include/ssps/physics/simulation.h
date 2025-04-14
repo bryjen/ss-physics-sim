@@ -1,40 +1,67 @@
 #ifndef SSPS_SIMULATION
 #define SSPS_SIMULATION
 
+#include <stdlib.h>
+#include "ssps/physics/vec3.h"
 
-typedef Vec3 Vec3;
 
 
 /**
  * @brief
  */
-typedef struct {
+typedef enum SSPS_ObjType {
+    OBJ_TYPE_BASE,
+    OBJ_TYPE_SPHERE,
+} SSPS_ObjType;
+
+
+
+/**
+ * @brief
+ */
+typedef struct SSPS_BaseObj {
+    SSPS_ObjType type;
     Vec3 pos, vel, acc;
     float mass;
-} ObjBase;
+} SSPS_BaseObj;
+
+/**
+ * @brief
+ */
+void 
+SSPS_BaseObj_update(SSPS_BaseObj *obj, float dt);
+
 
 
 /**
  * @brief
  */
-typedef struct {
-    ObjBase obj_base;
+typedef struct SSPS_Sphere {
+    SSPS_BaseObj obj_base;
     float radius;
-} SSPSCircle;
+} SSPS_Sphere;
+
+/**
+ * @brief
+ */
+void 
+SSPS_Sphere_update(SSPS_Sphere *sphere, float dt);
 
 
 
 /**
  * @brief
  */
-void 
-SimObj_init(ObjBase *obj);
-
+typedef struct SSPS_Simulation {
+    SSPS_BaseObj** objs;
+    size_t num_objs;
+} SSPS_Simulation;
 
 /**
  * @brief
  */
-void 
-SimObj_update(ObjBase *obj, float dt);
+void
+SSPS_Simulation_update(SSPS_Simulation *simulation, float dt);
+
 
 #endif
